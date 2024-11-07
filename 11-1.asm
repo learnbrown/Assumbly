@@ -6,7 +6,7 @@ data segment
     db 12H, 34H, 56H, 78H, 9AH, 0BCH, 0DEH, 0F0H, 11H, 22H, 33H, 44H, 55H, 66H, 77H, 88H
     db 0AAH, 0BBH, 0CCH, 0DDH, 0EEH, 0FFH, 00H, 11H, 22H, 33H, 44H, 55H, 66H, 77H, 88H, 99H
     ;  bc ef 22 56 89 bc df
-    ; 0x 1 21 FF DD BB 99 77 55 34 01 DF BC 89 56 22 EF BC
+    ; 结果：0x 1 21 FF DD BB 99 77 55 34 01 DF BC 89 56 22 EF BC
 data ends
 
 code segment
