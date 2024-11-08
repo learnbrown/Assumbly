@@ -1,4 +1,4 @@
-# Assumbler
+# Assumbly
 汇编学习记录
 
 ## 实验十
