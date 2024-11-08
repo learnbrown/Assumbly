@@ -103,3 +103,50 @@ divdw:
 ```
 ### 3.数值显示
 `dtoc` <br />
+功能：将word型数据转变为表示十进制数的字符串，字符串以0为结尾符 <br />
+参数：`(ax)` = word型数据 <br />
+      `ds:si`指向字符串首地址 <br />
+返回：无 <br />
+```asm
+dtoc:
+        push cx
+        push bx
+        push si
+        push dx
+        push di
+
+        mov cx,0
+        mov bx,10
+        mov di,0
+
+        t:  
+            div bx
+            mov cx,ax
+
+            ; 除10取余得到的是倒序的数，所以用到栈
+            add dx,30h
+            push dx
+            inc di  ; 记录位数
+
+            jcxz return_b
+            mov dx,0
+            
+            jmp short t
+
+        return_b:
+            ; 将数字出栈到内存
+            mov cx,di
+            m:
+                pop dx
+                mov [si],dl
+                inc si
+                loop m
+
+            pop di
+            pop dx
+            pop si
+            pop bx
+            pop cx
+
+            ret
+```

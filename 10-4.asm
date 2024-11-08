@@ -1,7 +1,8 @@
 assume cs:code,ds:data
 
 data segment
-    db 'Welcome to masm!', 0
+    db 10h dup(0)
+    ; db 'Welcome to masm!', 0
 data ends
 
 code segment
@@ -24,10 +25,21 @@ code segment
         ; mov cx,0ah
         ; call divdw
 
-        ; mov ax,4c00h
-        ; int 21h
 
+        ;测试dtoc
+        mov ax,7777
+        mov bx,data
+        mov ds,bx
+        mov si,0
+        call dtoc
 
+        mov dh,8
+        mov dl,3
+        mov cl,2
+        call show_str
+
+        mov ax,4c00h
+        int 21h
 
 
     ; show_str
@@ -67,14 +79,14 @@ code segment
         mov cx,0
         s:
             mov cl,[si]
-            jcxz return
+            jcxz return_a
             mov al,[si]
             mov es:[bx+di],ax
             inc si
             add di,2
             jmp short s
 
-        return:
+        return_a:
             pop bx
             pop di
             pop si
@@ -118,7 +130,56 @@ code segment
         pop si
 
         ret
+    
 
+    ; dtoc
+    ; 功能：将word型数据转变为表示十进制数的字符串，字符串以0为结尾符
+    ; 参数：(ax) = word型数据
+    ;       ds:si指向字符串首地址
+    ; 返回：无
+    ; 例：将数据12666以十进制的形式在屏幕的8行3列，用绿色显示出来
+    
+    dtoc:
+        push cx
+        push bx
+        push si
+        push dx
+        push di
+
+        mov cx,0
+        mov bx,10
+        mov di,0
+
+        t:  
+            div bx
+            mov cx,ax
+
+            ; 除10取余得到的是倒序的数，所以用到栈
+            add dx,30h
+            push dx
+            inc di  ; 记录位数
+
+            jcxz return_b
+            mov dx,0
+            
+            jmp short t
+
+        return_b:
+            ; 将数字出栈到内存
+            mov cx,di
+            m:
+                pop dx
+                mov [si],dl
+                inc si
+                loop m
+
+            pop di
+            pop dx
+            pop si
+            pop bx
+            pop cx
+
+            ret
 code ends
 
 end main
