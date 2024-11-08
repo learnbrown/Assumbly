@@ -161,3 +161,42 @@ dtoc:
       `(dx)` = dword型数据的高16位 <br />
       `ds:si`指向字符串首地址 <br />
 返回：无 <br />
+```asm
+dwtostr:
+        push di
+        push cx
+        push dx
+        push ax
+        push si
+
+        n:
+            mov cx,10
+            call divdw
+
+            add cx,30h
+            push cx
+            inc di
+            
+            mov cx,0
+            or cx,dx
+            or cx,ax
+            jcxz return_c
+
+            jmp short n
+
+        return_c:
+            mov cx,di
+            p:
+                pop dx
+                mov [si],dl
+                inc si
+                loop p
+
+            pop si
+            pop ax
+            pop dx
+            pop cx
+            pop di
+
+            ret
+```
