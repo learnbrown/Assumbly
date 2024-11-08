@@ -1,7 +1,7 @@
 # Assumbly
 汇编学习记录
 
-## 实验十
+## 实验十（P206）
 源文件[10-4.asm](/10-4.asm) <br />
 
 
@@ -93,7 +93,9 @@ divdw:
         mov di,ax ; 结果的高16位
         mov ax,si 
         div cx
-
+        
+        ; 余数存入cx
+        mov cx,dx
         mov dx,di
 
         pop di
@@ -150,3 +152,12 @@ dtoc:
 
             ret
 ```
+
+## 课程设计1（P211）
+### 1.dword到字符串
+`dwtostr` <br />
+功能：将dword型数据转变为表示十进制数的字符串，字符串以0为结尾符 <br />
+参数：`(ax)` = dword型数据的低16位 <br />
+      `(dx)` = dword型数据的高16位 <br />
+      `ds:si`指向字符串首地址 <br />
+返回：无 <br />

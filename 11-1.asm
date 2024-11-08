@@ -48,6 +48,7 @@ high_add:
     push ax
     push si
     push cx
+    push di
 
     add ax,0
     mov cx,8
@@ -65,6 +66,7 @@ high_add:
         ; add di,2 
         loop s
     
+    pop di
     pop cx
     pop si
     pop ax

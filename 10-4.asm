@@ -26,17 +26,31 @@ code segment
         ; call divdw
 
 
-        ;测试dtoc
-        mov ax,7777
-        mov bx,data
-        mov ds,bx
-        mov si,0
-        call dtoc
+        ; ;测试dtoc
+        ; mov ax,7777
+        ; mov bx,data
+        ; mov ds,bx
+        ; mov si,0
+        ; call dtoc
 
+        ; mov dh,8
+        ; mov dl,3
+        ; mov cl,2
+        ; call show_str
+
+        ; 测试dwtostr
+        mov ax,data
+        mov ds,ax
+        ; dx:ax = 1234567890
+        mov ax,02d2h
+        mov dx,4996h
+        mov si,0
+        call dwtostr
         mov dh,8
         mov dl,3
         mov cl,2
         call show_str
+
 
         mov ax,4c00h
         int 21h
@@ -123,7 +137,9 @@ code segment
         mov di,ax ; 结果的高16位
         mov ax,si 
         div cx
-
+        
+        ; 余数存入cx
+        mov cx,dx
         mov dx,di
 
         pop di
@@ -180,6 +196,52 @@ code segment
             pop cx
 
             ret
+
+    ; dwtostr
+    ; 功能：将dword型数据转变为表示十进制数的字符串，字符串以0为结尾符
+    ; 参数：(ax) = dword型数据的低16位
+    ;     (dx) = dword型数据的高16位
+    ;     ds:si指向字符串首地址
+    ; 返回：无
+    
+    dwtostr:
+        push di
+        push cx
+        push dx
+        push ax
+        push si
+
+        n:
+            mov cx,10
+            call divdw
+
+            add cx,30h
+            push cx
+            inc di
+            
+            mov cx,0
+            or cx,dx
+            or cx,ax
+            jcxz return_c
+
+            jmp short n
+
+        return_c:
+            mov cx,di
+            p:
+                pop dx
+                mov [si],dl
+                inc si
+                loop p
+
+            pop si
+            pop ax
+            pop dx
+            pop cx
+            pop di
+
+            ret
+
 code ends
 
 end main
