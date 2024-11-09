@@ -347,6 +347,12 @@ main:
 
             ret
 
+
+            
+    ; cls
+    ; 功能：清空屏幕显示
+    ; 参数：无
+    ; 返回：无
     cls:
         push ax
         push ds
