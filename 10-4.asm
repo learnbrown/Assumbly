@@ -68,9 +68,11 @@ code segment
         ; 将用到的寄存器压入栈中
         push ax
         push es
-        push si     ; 虽然si用作传参，但show_str中也用到了它，也将它压入栈中
+        push si
         push di
         push bx
+        push dx
+        push cx
 
         ; 设置显存位置
         mov ax,0b800h
@@ -101,6 +103,8 @@ code segment
             jmp short s
 
         return_a:
+            pop cx
+            pop dx
             pop bx
             pop di
             pop si

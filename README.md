@@ -22,9 +22,11 @@ show_str:
         ; 将用到的寄存器压入栈中
         push ax
         push es
-        push si     ; 虽然si用作传参，但show_str中也用到了它，也将它压入栈中
+        push si
         push di
         push bx
+        push dx
+        push cx
 
         ; 设置显存位置
         mov ax,0b800h
@@ -47,14 +49,16 @@ show_str:
         mov cx,0
         s:
             mov cl,[si]
-            jcxz return
+            jcxz return_a
             mov al,[si]
             mov es:[bx+di],ax
             inc si
             add di,2
             jmp short s
 
-        return:
+        return_a:
+            pop cx
+            pop dx
             pop bx
             pop di
             pop si
@@ -158,7 +162,9 @@ dtoc:
 ```
 
 ## 课程设计1（P211）
-[design.asm](./design.asm)
+[design.asm](./design.asm) <br />
+
+
 ### 1.dword到字符串
 `dwtostr` <br />
 功能：将dword型数据转变为表示十进制数的字符串，字符串以0为结尾符 <br />
@@ -211,3 +217,32 @@ dwtostr:
 
             ret
 ```
+
+### 2.cls清空屏幕
+遍历显存中彩色字符显示缓冲区第0页所用的160X25共4000个字节，将其均设为0以清空当前显示 <br />
+```asm
+    cls:
+        push ax
+        push ds
+        push si
+        push cx
+
+        mov ax,00b800h
+        mov ds,ax
+        mov si,0
+        mov cx,4000
+        cc:
+            mov word ptr [si],0
+            add si,2
+            loop cc
+
+        pop cx
+        pop si
+        pop ds
+        pop ax
+
+        ret
+```
+
+### 3.运行结果
+![result.png](./img/img1.png) <br />

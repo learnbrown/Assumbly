@@ -12,6 +12,7 @@ data segment
     dw 11542,14430,15257,17800
 data ends
 
+; 所有要显示的内容都转为字符串后放入table段中
 table segment
     db 21 dup('year', 0, 'sum-----', 0, 'num-----', 0, '----', 0, 0, 0, 0, 0)
 table ends
@@ -23,7 +24,7 @@ stack ends
 code segment
 
 main:
-    ; call cls
+    call cls
 
     mov ax,stack
     mov ss,ax
@@ -35,6 +36,9 @@ main:
     mov ax,data
     mov es,ax
 
+
+
+    ; 将年份复制到table段，收入处理后也放入table段
     mov si,0
     mov di,0
     mov cx,21
@@ -45,6 +49,8 @@ main:
         mov ax,es:[di+2]
         mov [si+2],ax
 
+
+        ; 处理收入
         mov ax,es:84[di]
         mov dx,es:84[di+2]
 
@@ -58,6 +64,9 @@ main:
         add si,20h
         loop year
     
+
+
+    ; 将人数处理后放入table段
     mov si,14   ; 指向人数的起始位置
     mov di,168  ; 指向原数据中人数的起始位置
     mov cx,21
@@ -72,8 +81,67 @@ main:
         add di,2
         loop num
     
+
+
+    ; 计算人均收入并放入table段
+    mov si,23   ; 指向人均收入起始位置
+    mov bx,84   ; 指向收入
+    mov di,168  ; 指向人数
     mov cx,21
-    
+    per:
+        ; 设置被除数
+        mov ax,es:[bx]
+        mov dx,es:[bx+2]
+        ; 设置除数
+        push cx
+        mov cx,es:[di]
+        call divdw
+        pop cx
+
+        call dwtostr
+
+        add si,20h
+        add bx,4
+        add di,2
+
+        loop per
+
+
+
+    ; 从第3行开始进行显示
+    mov dh,3
+    mov bx,0
+    mov si,0
+    mov cx,21
+    display:
+        push cx
+        mov cl,7
+        ; bx指向每行首位
+        mov si,bx
+
+        ; 第10列显示年份
+        mov dl,2
+        call show_str
+
+        ; 第30列显示收入
+        mov dl,25
+        add si,5
+        call show_str
+
+        ; 第50列显示人数
+        mov dl,50
+        add si,9
+        call show_str
+
+        ; 第70列显示人均收入
+        mov dl,70
+        add si,9
+        call show_str
+
+        add bx,20h
+        inc dh
+        pop cx
+        loop display
 
     mov ax,4c00h
     int 21h
@@ -91,9 +159,11 @@ main:
         ; 将用到的寄存器压入栈中
         push ax
         push es
-        push si     ; 虽然si用作传参，但show_str中也用到了它，也将它压入栈中
+        push si
         push di
         push bx
+        push dx
+        push cx
 
         ; 设置显存位置
         mov ax,0b800h
@@ -124,6 +194,8 @@ main:
             jmp short s
 
         return_a:
+            pop cx
+            pop dx
             pop bx
             pop di
             pop si
