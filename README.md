@@ -119,7 +119,11 @@ dtoc:
 
         mov cx,0
         mov bx,10
+        
+        ; 先将一个‘0’压入栈中
         mov di,0
+        push di
+        inc di
 
         t:  
             div bx
@@ -169,6 +173,11 @@ dwtostr:
         push ax
         push si
 
+        ; 先将一个‘0’压入栈中
+        mov di,0
+        push di
+        inc di
+
         n:
             mov cx,10
             call divdw
@@ -186,6 +195,7 @@ dwtostr:
 
         return_c:
             mov cx,di
+            
             p:
                 pop dx
                 mov [si],dl

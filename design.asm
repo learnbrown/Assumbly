@@ -1,59 +1,82 @@
-assume cs:code,ds:data
+assume cs:code,ds:data,ds:table,ss:stack
 
 data segment
-    db 10h dup(0)
-    ; db 'Welcome to masm!', 0
+    db '1975','1976','1977','1978','1979','1980','1981','1982','1983'
+    db '1984','1985','1986','1987','1988','1989','1990','1991','1992'
+    db '1993','1994','1995'
+
+    dd 16,22,382,1356,2390,8000,16000,24486,50065,97479,140417,197514
+    dd 345980,590827,803530,1183000,1843000,2759000,3753000,4649000,5937000
+    
+    dw 3,7,9,13,28,38,130,220,476,778,1001,1442,2258,2793,4037,5635,8226
+    dw 11542,14430,15257,17800
 data ends
+
+table segment
+    db 21 dup('year', 0, 'sum-----', 0, 'num-----', 0, '----', 0, 0, 0, 0, 0)
+table ends
+
+stack segment
+    db 100h dup(0)
+stack ends
 
 code segment
 
-    main:
+main:
+    ; call cls
 
-        ; ;测试show_str
-        ; mov ax,data
-        ; mov ds,ax
+    mov ax,stack
+    mov ss,ax
+    mov sp,100h
+    
+    mov ax,table
+    mov ds,ax
 
-        ; mov dh,12
-        ; mov dl,32
-        ; mov cl,7
-        ; mov si,0
-        ; call show_str
+    mov ax,data
+    mov es,ax
 
-        ; ; 测试divdw
-        ; mov ax,4240h
-        ; mov dx,000fh
-        ; mov cx,0ah
-        ; call divdw
+    mov si,0
+    mov di,0
+    mov cx,21
+    year:
+        ; 年份
+        mov ax,es:[di]
+        mov [si],ax
+        mov ax,es:[di+2]
+        mov [si+2],ax
 
+        mov ax,es:84[di]
+        mov dx,es:84[di+2]
 
-        ; ;测试dtoc
-        ; mov ax,7777
-        ; mov bx,data
-        ; mov ds,bx
-        ; mov si,0
-        ; call dtoc
-
-        ; mov dh,8
-        ; mov dl,3
-        ; mov cl,2
-        ; call show_str
-
-        ; 测试dwtostr
-        mov ax,data
-        mov ds,ax
-        ; dx:ax = 1234567890
-        mov ax,02d2h
-        mov dx,4996h
-        mov si,0
+        ; ds段中用si来指向每一行数据起始位置，但是传入参数需要指向收入的起始位置，就先将其入栈，返回后恢复
+        push si
+        add si,5
         call dwtostr
-        mov dh,8
-        mov dl,3
-        mov cl,2
-        call show_str
+        pop si
 
+        add di,4
+        add si,20h
+        loop year
+    
+    mov si,14   ; 指向人数的起始位置
+    mov di,168  ; 指向原数据中人数的起始位置
+    mov cx,21
+    num:
+        ; 人数
+        mov ax,es:[di]
+        mov dx,0
 
-        mov ax,4c00h
-        int 21h
+        call dwtostr
+
+        add si,20h
+        add di,2
+        loop num
+    
+    mov cx,21
+    
+
+    mov ax,4c00h
+    int 21h
 
 
     ; show_str
@@ -164,7 +187,7 @@ code segment
 
         mov cx,0
         mov bx,10
-        
+
         ; 先将一个‘0’压入栈中
         mov di,0
         push di
@@ -237,6 +260,7 @@ code segment
 
         return_c:
             mov cx,di
+            
             p:
                 pop dx
                 mov [si],dl
@@ -252,6 +276,11 @@ code segment
             ret
 
     cls:
+        push ax
+        push ds
+        push si
+        push cx
+
         mov ax,00b800h
         mov ds,ax
         mov si,0
@@ -260,7 +289,14 @@ code segment
             mov word ptr [si],0
             add si,2
             loop cc
+
+        pop cx
+        pop si
+        pop ds
+        pop ax
+
         ret
+
 code ends
 
 end main
