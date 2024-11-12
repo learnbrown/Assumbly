@@ -247,6 +247,150 @@ dwtostr:
 
         ret
 ```
+### 3.数据处理
+#### (1) 数据段的设置
+在data段中，存放了所有的源数据，年份、总收入和雇员数分别声明在一起。 <br />
+table段用来放置转换为字符串后的数据，每行数据占用32Byte，每行中不同数据用若干个字符占位。 <br />
+```asm
+data segment
+    db '1975','1976','1977','1978','1979','1980','1981','1982','1983'
+    db '1984','1985','1986','1987','1988','1989','1990','1991','1992'
+    db '1993','1994','1995'
 
-### 3.运行结果
+    dd 16,22,382,1356,2390,8000,16000,24486,50065,97479,140417,197514
+    dd 345980,590827,803530,1183000,1843000,2759000,3753000,4649000,5937000
+    
+    dw 3,7,9,13,28,38,130,220,476,778,1001,1442,2258,2793,4037,5635,8226
+    dw 11542,14430,15257,17800
+data ends
+
+table segment
+    db 21 dup('year', 0, 'sum-----', 0, 'num-----', 0, '----', 0, 0, 0, 0, 0)
+table ends
+```
+
+代码段主程序中设置数据段短地址时，将es指向data段，将ds指向table段，原因在于所有子程序在使用数据段时都是使用ds:si，将转换为字符串后的数据放入table段时，可以直接使子程序的结果放到ds:si中。 <br />
+```asm
+    mov ax,stack
+    mov ss,ax
+    mov sp,100h
+    
+    mov ax,table
+    mov ds,ax
+
+    mov ax,data
+    mov es,ax
+```
+#### (2) 年份及总收入
+利用循环进行处理，每次循环中，由于年份已经是字符串存储，就直接将年份复制到table段中的对应位置上。 <br />
+此外由于年份和总收入的每条数据都是4Byte，用es:di处理时可以同时进行处理，处理收入时只需使用es:di+84即可访问到年份对应的总收入。 <br />
+再设置参数令si指向table段中总收入对应位置，调用dwtostr子程序就能将总收入以字符串的形式保存到table段中。 <br />
+不过由于我们让si每次都是指向每行的起始地址，在调用dwtostr时又需要将si设置到收入的位置，所以就需要在设置参数前将si入栈，调用子程序后再返回。 <br />
+```asm
+    ; 将年份复制到table段，收入处理后也放入table段
+    mov si,0
+    mov di,0
+    mov cx,21
+    year:
+        ; 年份
+        mov ax,es:[di]
+        mov [si],ax
+        mov ax,es:[di+2]
+        mov [si+2],ax
+
+
+        ; 处理收入
+        mov ax,es:84[di]
+        mov dx,es:84[di+2]
+
+        ; ds段中用si来指向每一行数据起始位置，但是传入参数需要指向收入的起始位置，就先将其入栈，返回后恢复
+        push si
+        add si,5
+        call dwtostr
+        pop si
+
+        add di,4
+        add si,20h
+        loop year
+```
+#### (3) 雇员数
+```asm
+    ; 将人数处理后放入table段
+    mov si,14   ; 指向人数的起始位置
+    mov di,168  ; 指向原数据中人数的起始位置
+    mov cx,21
+    num:
+        ; 人数
+        mov ax,es:[di]
+        mov dx,0
+
+        call dwtostr
+
+        add si,20h
+        add di,2
+        loop num
+```
+#### (4) 计算人均收入
+```asm
+    ; 计算人均收入并放入table段
+    mov si,23   ; 指向人均收入起始位置
+    mov bx,84   ; 指向收入
+    mov di,168  ; 指向人数
+    mov cx,21
+    per:
+        ; 设置被除数
+        mov ax,es:[bx]
+        mov dx,es:[bx+2]
+        ; 设置除数
+        push cx
+        mov cx,es:[di]
+        call divdw
+        pop cx
+
+        call dwtostr
+
+        add si,20h
+        add bx,4
+        add di,2
+
+        loop per
+```
+##### (5) 显示结果
+```asm
+    ; 从第3行开始进行显示
+    mov dh,3
+    mov bx,0
+    mov si,0
+    mov cx,21
+    display:
+        push cx
+        mov cl,7
+        ; bx指向每行首位
+        mov si,bx
+
+        ; 第10列显示年份
+        mov dl,2
+        call show_str
+
+        ; 第30列显示收入
+        mov dl,25
+        add si,5
+        call show_str
+
+        ; 第50列显示人数
+        mov dl,50
+        add si,9
+        call show_str
+
+        ; 第70列显示人均收入
+        mov dl,70
+        add si,9
+        call show_str
+
+        add bx,20h
+        inc dh
+        pop cx
+        loop display
+```
+### 4.运行结果
 ![result.png](./img/img1.png) <br />
