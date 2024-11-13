@@ -314,6 +314,7 @@ table ends
         loop year
 ```
 #### (3) 雇员数
+同总收入的处理。 <br />
 ```asm
     ; 将人数处理后放入table段
     mov si,14   ; 指向人数的起始位置
@@ -331,6 +332,7 @@ table ends
         loop num
 ```
 #### (4) 计算人均收入
+每次循环时，`ds:si`指向table段的人均收入位置，`es:bx`指向data段中收入位置，`es:di`指向总人数位置，调用dword除法前，设置被除数高位`dx`为`es:bx+2`，被除数低位为`es:bx`，除数`cx`为es:di。 <br />
 ```asm
     ; 计算人均收入并放入table段
     mov si,23   ; 指向人均收入起始位置
