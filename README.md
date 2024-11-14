@@ -395,4 +395,5 @@ table ends
         loop display
 ```
 ### 4.运行结果
+该公司每年对应的总收入、雇员数及人均收入以结构化的形式显示在了屏幕上。 <br />
 ![result.png](./img/img1.png) <br />
