@@ -323,6 +323,7 @@ main:
             push cx
             inc di
             
+            ; 判断商是否为零，即dx，ax是否均为零
             mov cx,0
             or cx,dx
             or cx,ax
@@ -331,7 +332,7 @@ main:
             jmp short n
 
         return_c:
-            mov cx,di
+            mov cx,di ; 出栈次数
             
             p:
                 pop dx
