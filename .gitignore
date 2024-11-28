@@ -1,3 +1,7 @@
 # Ignore all .obj and .exe files
 *.obj
 *.exe
+
+!masm.exe
+!link.exe
+!debug.exe
