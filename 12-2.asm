@@ -6,8 +6,10 @@ stack segment
 stack ends
 
 data segment
+    ; 保存int 9中断例程的地址
     nine dw 0,0
 
+    ; 放置日期时间字符串
     year db '2000/'
     month db '00/'
     day db '00 '
@@ -15,6 +17,7 @@ data segment
     minute db '00:'
     second db '00',0
 
+    ; 放置提示语字符串
     tip db 'Press "Esc" to quit.',0
 data ends
 
