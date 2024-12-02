@@ -541,9 +541,4 @@ code segment
 
 code ends
 
-signal segment 
-
-
-signal ends
-
 end main
